@@ -8,13 +8,14 @@ import os
 import hashlib
 
 # TODO: Tests mit pytest und pytest_cov erstellen
-# TODO: GH Actions Tests und Deployment laufen lassen
+# TODO: GH Actions Tests und Deployment laufen lassen, siehe https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 # TODO: In PIP bereitstellen und Einbindung dokumentieren
 
 class MD5FileHandler:
 
-    def __init__(self, root_path = "./"):
+    def __init__(self, root_path = "./", depth = 5):
         self.root_path = root_path
+        self.depth = depth
 
     def _calculate_full_path(self, md5_hash, is_metadata):
         filename = md5_hash
@@ -28,7 +29,7 @@ class MD5FileHandler:
         file_metadata_path = self._calculate_full_path(md5_hash = md5_hash, is_metadata = True)
         # TODO: Inhalt speichern
         # TODO: Metadatan speichern
-        pass
+        return md5_hash
 
     def delete_file(self, md5_hash):
         file_content_path = self._calculate_full_path(md5_hash = md5_hash, is_metadata = False)
