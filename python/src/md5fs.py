@@ -6,6 +6,7 @@ Please have a look into README.md for a detailed documentation.
 """
 import os
 import hashlib
+import json
 
 # TODO: Tests mit pytest und pytest_cov erstellen
 # TODO: GH Actions Tests und Deployment laufen lassen, siehe https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
@@ -17,18 +18,24 @@ class MD5FileHandler:
         self.root_path = root_path
         self.depth = depth
 
-    def _calculate_full_path(self, md5_hash, is_metadata):
-        filename = md5_hash
-        if is_metadata:
-            filename += ".json"
-        return os.path.join(self.root_path, md5_hash[0], md5_hash[1], md5_hash[2], md5_hash[3], md5_hash[4], filename)
+    def _calculate_path(self, md5_hash):
+        hash_parts = list(md5_hash)[:self.depth]
+        return os.path.join(self.root_path, *hash_parts)
 
     def create_file(self, filename, content, content_type):
         md5_hash = hashlib.md5(content).hexdigest()
-        file_content_path = self._calculate_full_path(md5_hash = md5_hash, is_metadata = False)
-        file_metadata_path = self._calculate_full_path(md5_hash = md5_hash, is_metadata = True)
-        # TODO: Inhalt speichern
-        # TODO: Metadatan speichern
+        file_path = self._calculate_path(md5_hash = md5_hash)
+        os.makedirs(file_path, exist_ok=True)
+        # Save content file
+        with open(os.path.join(file_path, md5_hash), "wb") as file:
+            file.write(content)
+        # Save metadata
+        metadata = {
+            "filename" : filename,
+            "contenttype" : content_type
+        }
+        with open(os.path.join(file_path, md5_hash + ".json"), "w") as file:
+            json.dump(metadata, file)
         return md5_hash
 
     def delete_file(self, md5_hash):
